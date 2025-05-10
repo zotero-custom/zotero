@@ -211,7 +211,9 @@ pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);
 
 // Retracted Items
-pref("extensions.zotero.retractions.enabled", true);
+// retractions/list endpoint doesn't seem to work in localhosted version,
+// so going to default to disabling this feature instead.
+pref("extensions.zotero.retractions.enabled", false);
 pref("extensions.zotero.retractions.recentItems", "[]");
 
 // Annotations
