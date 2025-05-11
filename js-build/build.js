@@ -9,13 +9,18 @@ const getReader = require('./reader');
 const getPDFWorker = require('./pdf-worker');
 const getZoteroNoteEditor = require('./note-editor');
 const { formatDirsForMatcher, getSignatures, writeSignatures, cleanUp, onSuccess, onError} = require('./utils');
-const { dirs, symlinkDirs, copyDirs, symlinkFiles, jsFiles, scssFiles, ignoreMask } = require('./config');
+const { dirs, symlinkDirs, copyDirs, symlinkFiles, jsFiles, scssFiles, ignoreMask, buildZoteroConfig } = require('./config');
 
 if (require.main === module) {
 	(async () => {
 		try {
 			const t1 = Date.now();
 			global.isError = false; // used to prevent further output to avoid concealing errors
+			
+			// Build Zotero config from environment variables
+			console.log(colors.green('Building Zotero config...'));
+			buildZoteroConfig();
+			
 			const symlinks = symlinkFiles
 				.concat(dirs.map(d => `${d}/**`))
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.js`])

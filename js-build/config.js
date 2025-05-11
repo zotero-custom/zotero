@@ -134,6 +134,75 @@ const ftlFileBaseNames = [
 
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
 
+
+function buildZoteroConfig() {
+	const fs = require('fs');
+	const path = require('path');
+
+	// Define the env vars;
+	// default to a local-hosted instance of the data/stream servers.
+  const envVars = {
+    ZOTERO_GUID: process.env.ZOTERO_GUID || 'zotero@zotero.org',
+    ZOTERO_ID: process.env.ZOTERO_ID || 'zotero',
+    ZOTERO_CLIENT_NAME: process.env.ZOTERO_CLIENT_NAME || 'Zotero',
+    ZOTERO_DOMAIN_NAME: process.env.ZOTERO_DOMAIN_NAME || 'zotero.org',
+    ZOTERO_PRODUCER: process.env.ZOTERO_PRODUCER || 'Digital Scholar',
+    ZOTERO_PRODUCER_URL: process.env.ZOTERO_PRODUCER_URL || 'https://digitalscholar.org',
+    ZOTERO_REPOSITORY_URL: process.env.ZOTERO_REPOSITORY_URL || 'https://repo.zotero.org/repo/',
+    ZOTERO_BASE_URI: process.env.ZOTERO_BASE_URI || 'http://zotero.org/',
+    ZOTERO_WWW_BASE_URL: process.env.ZOTERO_WWW_BASE_URL || 'https://www.zotero.org/',
+    ZOTERO_PROXY_AUTH_URL: process.env.ZOTERO_PROXY_AUTH_URL || '',
+    ZOTERO_API_URL: process.env.ZOTERO_API_URL || 'http://dataserver/',
+    ZOTERO_STREAMING_URL: process.env.ZOTERO_STREAMING_URL || 'ws://stream-server/',
+    ZOTERO_SERVICES_URL: process.env.ZOTERO_SERVICES_URL || 'https://services.zotero.org/',
+    ZOTERO_API_VERSION: process.env.ZOTERO_API_VERSION || '3',
+    ZOTERO_CONNECTOR_MIN_VERSION: process.env.ZOTERO_CONNECTOR_MIN_VERSION || '5.0.39',
+    ZOTERO_PREF_BRANCH: process.env.ZOTERO_PREF_BRANCH || 'extensions.zotero.',
+    ZOTERO_BOOKMARKLET_ORIGIN: process.env.ZOTERO_BOOKMARKLET_ORIGIN || 'https://www.zotero.org',
+    ZOTERO_BOOKMARKLET_URL: process.env.ZOTERO_BOOKMARKLET_URL || 'https://www.zotero.org/bookmarklet/',
+    ZOTERO_START_URL: process.env.ZOTERO_START_URL || 'https://www.zotero.org/start',
+    ZOTERO_QUICK_START_URL: process.env.ZOTERO_QUICK_START_URL || 'https://www.zotero.org/support/quick_start_guide',
+    ZOTERO_PDF_TOOLS_URL: process.env.ZOTERO_PDF_TOOLS_URL || 'https://www.zotero.org/download/xpdf/',
+    ZOTERO_SUPPORT_URL: process.env.ZOTERO_SUPPORT_URL || 'https://www.zotero.org/support/',
+    ZOTERO_SYNC_INFO_URL: process.env.ZOTERO_SYNC_INFO_URL || 'https://www.zotero.org/support/sync',
+    ZOTERO_TROUBLESHOOTING_URL: process.env.ZOTERO_TROUBLESHOOTING_URL || 'https://www.zotero.org/support/getting_help',
+    ZOTERO_FEEDBACK_URL: process.env.ZOTERO_FEEDBACK_URL || 'https://forums.zotero.org/',
+    ZOTERO_CONNECTORS_URL: process.env.ZOTERO_CONNECTORS_URL || 'https://www.zotero.org/download/connectors',
+    ZOTERO_CHANGELOG_URL: process.env.ZOTERO_CHANGELOG_URL || 'https://www.zotero.org/support/changelog',
+    ZOTERO_CREDITS_URL: process.env.ZOTERO_CREDITS_URL || 'https://www.zotero.org/support/credits_and_acknowledgments',
+    ZOTERO_LICENSING_URL: process.env.ZOTERO_LICENSING_URL || 'https://www.zotero.org/support/licensing',
+    ZOTERO_GET_INVOLVED_URL: process.env.ZOTERO_GET_INVOLVED_URL || 'https://www.zotero.org/getinvolved',
+    ZOTERO_DICTIONARIES_URL: process.env.ZOTERO_DICTIONARIES_URL || 'https://download.zotero.org/dictionaries/',
+    ZOTERO_PLUGINS_URL: process.env.ZOTERO_PLUGINS_URL || 'https://www.zotero.org/support/plugins',
+    ZOTERO_NEW_FEATURES_URL: process.env.ZOTERO_NEW_FEATURES_URL || 'https://www.zotero.org/blog/zotero-7/'
+  };
+
+  // Read the template file
+  const templatePath = path.join(__dirname, '../resource/config.template.js');
+  let template;
+
+  try {
+    template = fs.readFileSync(templatePath, 'utf8');
+  } catch (e) {
+    console.error(`Could not read template file at ${templatePath}`);
+    process.exit(1);
+  }
+
+  // Replace all placeholders
+  Object.entries(envVars).forEach(([key, value]) => {
+    const placeholder = `{{${key}}}`;
+    // Special handling for API_VERSION to ensure it remains a number
+    const replacementValue = key === 'ZOTERO_API_VERSION' ? value : JSON.stringify(value);
+    template = template.replace(new RegExp(placeholder, 'g'), replacementValue);
+  });
+
+  // Write the output - check where the original config.js is located
+  const outputPath = path.join(__dirname, '../resource/config.js');
+  fs.writeFileSync(outputPath, template);
+
+  console.log(`Zotero config built successfully at ${outputPath}`);
+}
+
 module.exports = {
 	dirs,
 	symlinkDirs,
@@ -145,4 +214,5 @@ module.exports = {
 	ignoreMask,
 	ftlFileBaseNames,
 	buildsURL,
+	buildZoteroConfig,
 };
